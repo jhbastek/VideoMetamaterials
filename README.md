@@ -4,7 +4,7 @@ We introduce a framework to create mechanical metamaterials with a given nonline
 
 To run the studies, simply clone this repository via
 ```
-git clone https://github.com/jhbastek/VideoMetaMaterials.git
+git clone https://github.com/jhbastek/VideoMetamaterials.git
 ```
 and run **main.py** with the indicated study.
 
