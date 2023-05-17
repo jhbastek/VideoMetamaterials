@@ -15,19 +15,19 @@ and run **main.py** with the indicated study.
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
-## Requirements
+## Dependencies
 
-- Python (tested on version 3.11)
-- Python packages:
-  - Pytorch (2.0.1 with CUDA 12.0)
-  - Einops (0.6.1)
-  - Einops-exts (0.6.1)
-  - Rotary_embedding_torch (0.2.3)
-  - Accelerate (0.19.0)
-  - Imageio (2.28.1)
-  - Wandb (0.15.2)
-  - Tqdm (4.65.0)
-  - Matplotlib (3.3.2, only required for plotting)
+The framework was developed and tested on Python 3.11 and relies on the following Python packages.
+package | version (>=)
+:-|:-
+`pytorch`       | `2.0.1`
+`einops`        | `0.6.1`
+`einops-exts`   | `0.6.1`
+`rotary_embedding_torch` | `0.2.3`
+`accelerate`    | `0.19.0`
+`imageio`       | `2.28.1`
+`wandb`         | `0.15.2`
+`tqdm`          | `4.65.0`
 
 ## Citation
 
