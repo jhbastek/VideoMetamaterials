@@ -1,6 +1,6 @@
 $~$
 
-<p align="center"><img src="pred_bright.gif#gh-light-mode-only" width="600"\></p>
+<p align="center"><img src="pred_light.gif#gh-light-mode-only" width="600"\></p>
 <p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="600"\></p>
 
 # Inverse-design of nonlinear mechanical metamaterials via video denoising diffusion models
