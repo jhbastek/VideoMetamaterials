@@ -15,7 +15,7 @@ to train the diffusion model or simply generate new metamaterial desings for giv
 We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup as described before starting model training via 
 ```
 accelerate launch main.py
-```.
+```
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
