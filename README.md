@@ -26,8 +26,8 @@ package | version (>=)
 `rotary_embedding_torch` | `0.2.3`
 `accelerate`    | `0.19.0`
 `imageio`       | `2.28.1`
-`wandb` (optional)        | `0.15.2`
 `tqdm`          | `4.65.0`
+`wandb` (optional)        | `0.15.2`
 
 ## Citation
 
