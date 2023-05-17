@@ -1,0 +1,26 @@
+# training configuration
+batch_size: 4 # per-gpu batch size
+guidance_scale: 5 # classifier-free guidance scaling
+learning_rate: 1.e-4
+selected_channels: # select channels to consider: 0 - u_1, 1 - u_2, 2 - \sigma_{von Mises}, 3 - \sigma_{22} for Lagrangian reference frame
+- 0
+- 1
+- 3
+train_timesteps: 256
+sampling_timesteps: 256 # DDIM (https://arxiv.org/abs/2010.02502) is applied if sampling_timesteps < train_timesteps
+use_dynamic_thres: true
+# architecture configuration
+reference_frame: 'lagrangian' # 'lagrangian', 'eulerian'
+padding_mode: 'zeros' # 'zeros', 'circular_1d', 'circular'
+unet_dim: 64 
+unet_attn_dim_head: 32
+unet_attn_heads: 8
+unet_resnet_groups: 8
+unet_cond_attention: 'self-stacked' # 'none', 'self-stacked', 'cross-attention'
+unet_cond_to_time: 'add' # 'add', 'concat'
+unet_temporal_att_cond: true
+unet_use_sparse_linear_attn: true
+per_frame_cond: true
+# only relevant if per_frame_cond: false, used in ablation study
+unet_cond_att_GRU: false
+unet_cond_attention_tokens: 16
