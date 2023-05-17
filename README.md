@@ -7,11 +7,15 @@ $~$
 
 We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code is an adapted from the video diffusion architecture published by [Phil Wang](https://github.com/lucidrains/imagen-pytorch).
 
-To run the studies, simply clone this repository via
+Simply clone this repository via
 ```
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ```
-and run **main.py** with the indicated study.
+to train the diffusion model or simply generate new metamaterial desings for given stress-strain responses. 
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup as described before starting model training via 
+```
+accelerate launch main.py
+```.
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
