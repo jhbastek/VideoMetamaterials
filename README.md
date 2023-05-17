@@ -17,7 +17,7 @@ For further information, please first refer to the [TBA], the Supporting Informa
 
 ## Dependencies
 
-The framework was developed and tested on Python 3.11 and relies on the following Python packages.
+The framework was developed and tested on Python 3.11 with CUDA 12.0 and relies on the following Python packages.
 package | version (>=)
 :-|:-
 `pytorch`       | `2.0.1`
