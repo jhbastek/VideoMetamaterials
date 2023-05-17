@@ -18,7 +18,7 @@ For further information, please first refer to the [TBA], the Supporting Informa
 ## Dependencies
 
 The framework was developed and tested on Python 3.11 using CUDA 12.0 and relies on the following Python packages.
-package | version (>=)
+Package | Version (>=)
 :-|:-
 `pytorch`       | `2.0.1`
 `einops`        | `0.6.1`
