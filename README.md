@@ -1,7 +1,7 @@
 $~$
 
-<p align="center"><img src="pred_light.gif#gh-light-mode-only" width="500"\></p>
-<p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="500"\></p>
+<p align="center"><img src="pred_light.gif#gh-light-mode-only" width="550"\></p>
+<p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="550"\></p>
 
 # Inverse-design of nonlinear mechanical metamaterials via video denoising diffusion models
 
