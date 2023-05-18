@@ -10,7 +10,6 @@ from torch.utils import data
 from pathlib import Path
 from torch.optim import Adam
 from torchvision import transforms as T
-from torch.cuda.amp import GradScaler
 from PIL import Image
 
 import time
@@ -1183,14 +1182,14 @@ class Dataset(data.Dataset):
 
         assert len(self.paths_mises) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
-        # load s_y data
-        s_y_folder = folder + 'gifs/s_y/'
-        self.paths_s_y = [p for ext in exts for p in Path(f'{s_y_folder}').glob(f'**/*.{ext}')]
+        # load s_22 data
+        s_22_folder = folder + 'gifs/s_y/'
+        self.paths_s_22 = [p for ext in exts for p in Path(f'{s_22_folder}').glob(f'**/*.{ext}')]
         # sort paths by number of name
-        self.paths_s_y = sorted(self.paths_s_y, key=lambda x: int(x.name.split('.')[0]))
-        assert all([int(p.stem) == i for i, p in enumerate(self.paths_s_y)]), 'file position is not equal to index'
+        self.paths_s_22 = sorted(self.paths_s_22, key=lambda x: int(x.name.split('.')[0]))
+        assert all([int(p.stem) == i for i, p in enumerate(self.paths_s_22)]), 'file position is not equal to index'
 
-        assert len(self.paths_s_y) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
+        assert len(self.paths_s_22) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
         # load ener data
         ener_folder = folder + 'gifs/ener/'
@@ -1207,8 +1206,8 @@ class Dataset(data.Dataset):
 
         if reference_frame == 'eulerian':
             self.max_von_Mises = torch.max(self.frame_ranges[:,0])
-            self.min_S_y = torch.min(self.frame_ranges[:,1])
-            self.max_S_y = torch.max(self.frame_ranges[:,2])
+            self.min_s_22 = torch.min(self.frame_ranges[:,1])
+            self.max_s_22 = torch.max(self.frame_ranges[:,2])
             self.max_strain_energy = torch.max(self.frame_ranges[:,3])
 
             self.zero_disp_y = None
@@ -1218,8 +1217,8 @@ class Dataset(data.Dataset):
             self.min_disp_y = torch.min(self.frame_ranges[:,2])
             self.max_disp_y = torch.max(self.frame_ranges[:,3])
             self.max_von_Mises = torch.max(self.frame_ranges[:,4])
-            self.min_S_y = torch.min(self.frame_ranges[:,5])
-            self.max_S_y = torch.max(self.frame_ranges[:,6])
+            self.min_s_22 = torch.min(self.frame_ranges[:,5])
+            self.max_s_22 = torch.max(self.frame_ranges[:,6])
             self.max_strain_energy = torch.max(self.frame_ranges[:,7])
 
             self.zero_disp_y = self.normalize(torch.zeros(1), self.min_disp_y, self.max_disp_y)
@@ -1253,9 +1252,10 @@ class Dataset(data.Dataset):
 
         # compute normalization if not given
         if labels_scaling is None:
-            # normalize labels to [-1, 1]
+            # normalize labels to [-1, 1] based on global min/max (i.e., min/max of all samples in training set)
             self.labels_scaling = Normalization(self.labels, ['continuous']*self.labels.shape[1], 'global-min-max-2')
         else:
+            # use given normalization (relevant for validation set, which should use same normalization as training set)
             self.labels_scaling = labels_scaling
         # apply normalization
         self.labels = self.labels_scaling.normalize(self.labels)
@@ -1284,12 +1284,12 @@ class Dataset(data.Dataset):
         if self.reference_frame == 'eulerian':
             paths_top = self.paths_top[index]
             paths_mises = self.paths_mises[index]
-            paths_s_y = self.paths_s_y[index]
+            paths_s_22 = self.paths_s_22[index]
             paths_ener = self.paths_ener[index]
 
             tensor = torch.cat((gif_to_tensor(paths_top, channels=1, transform = self.transform), 
                                 gif_to_tensor(paths_mises, channels=1, transform = self.transform),
-                                gif_to_tensor(paths_s_y, channels=1, transform = self.transform),
+                                gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_ener, channels=1, transform = self.transform),
                                 ), dim=0)
             
@@ -1300,14 +1300,13 @@ class Dataset(data.Dataset):
             tensor[3,:,:,:] = self.unnorm(tensor[3,:,:,:], 0., self.frame_ranges[index,3])
 
             # set values to zero for all pixels where topology is zero
-            # IMPORTANT: we must do this for S_y here since 0 after normalization does NOT correspond to actual 0 stresses (since min_S_y is not 0)
-            tensor[1,:,:,:][tensor[0,:,:,:] == 0.] = 0.
-            tensor[2,:,:,:][tensor[0,:,:,:] == 0.] = 0.
-            tensor[3,:,:,:][tensor[0,:,:,:] == 0.] = 0.
+            # IMPORTANT: we must do this after scaling values true range to ensure a 0 value corresponds to true 0 field value
+            for i in range(1,4):
+                tensor[i,:,:,:][topologies[0,:,:,:] == 0.] = 0.
 
             # normalize to global range
             tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], 0., self.max_von_Mises)
-            tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], self.min_S_y, self.max_S_y)
+            tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], self.min_s_22, self.max_s_22)
             tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], 0., self.max_strain_energy)
 
         elif self.reference_frame == 'lagrangian' and self.num_frames != 1:
@@ -1315,14 +1314,14 @@ class Dataset(data.Dataset):
             paths_disp_x = self.paths_disp_x[index]
             paths_disp_y = self.paths_disp_y[index]
             paths_mises = self.paths_mises[index]
-            paths_s_y = self.paths_s_y[index]
+            paths_s_22 = self.paths_s_22[index]
 
             topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
 
             tensor = torch.cat((gif_to_tensor(paths_disp_x, channels=1, transform = self.transform), 
                                 gif_to_tensor(paths_disp_y, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_mises, channels=1, transform = self.transform),
-                                gif_to_tensor(paths_s_y, channels=1, transform = self.transform),
+                                gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 ), dim=0)
             
             ## convert tensor to [0,1]-normalized global range
@@ -1333,27 +1332,26 @@ class Dataset(data.Dataset):
             tensor[3,:,:,:] = self.unnorm(tensor[3,:,:,:], self.frame_ranges[index,5], self.frame_ranges[index,6])
 
             # set values to zero for all pixels where topology is zero
-            # IMPORTANT: we must do this here since 0 after normalization does NOT correspond to actual 0 stresses (since min is not 0)
-            tensor[0,:,:,:][topologies[0,:,:,:] == 0.] = 0.
-            tensor[1,:,:,:][topologies[0,:,:,:] == 0.] = 0.
-            tensor[2,:,:,:][topologies[0,:,:,:] == 0.] = 0.
-            tensor[3,:,:,:][topologies[0,:,:,:] == 0.] = 0.
+            # IMPORTANT: we must do this after scaling values true range to ensure a 0 value corresponds to true 0 field value
+            for i in range(4):
+                tensor[i,:,:,:][topologies[0,:,:,:] == 0.] = 0.
 
             # normalize to global range
             tensor[0,:,:,:] = self.normalize(tensor[0,:,:,:], self.min_disp_x, self.max_disp_x)
             tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_disp_y, self.max_disp_y)
             tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], 0., self.max_von_Mises)
-            tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], self.min_S_y, self.max_S_y)
+            tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], self.min_s_22, self.max_s_22)
 
+        # only relevant for ablation study, where we consider two channels (topology and sigma_22)
         elif self.reference_frame == 'lagrangian' and self.num_frames == 1:
             paths_top = self.paths_top[index]
             paths_mises = self.paths_mises[index]
-            paths_s_y = self.paths_s_y[index]
+            paths_s_22 = self.paths_s_22[index]
 
             topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
 
             tensor = torch.cat((gif_to_tensor(paths_top, channels=1, transform = self.transform),
-                                gif_to_tensor(paths_s_y, channels=1, transform = self.transform),
+                                gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 ), dim=0)
             
             ## convert tensor to [0,1]-normalized global range
@@ -1361,12 +1359,11 @@ class Dataset(data.Dataset):
             tensor[1,:,:,:] = self.unnorm(tensor[1,:,:,:], self.frame_ranges[index,5], self.frame_ranges[index,6])
 
             # set values to zero for all pixels where topology is zero
-            # IMPORTANT: we must do this here since 0 after normalization does NOT correspond to actual 0 stresses (since min is not 0)
-            tensor[0,:,:,:][topologies[0,:,:,:] == 0.] = 0.
+            # IMPORTANT: we must do this after scaling values true range to ensure a 0 value corresponds to true 0 field value
             tensor[1,:,:,:][topologies[0,:,:,:] == 0.] = 0.
 
             # normalize to global range
-            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_S_y, self.max_S_y)
+            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_s_22, self.max_s_22)
 
             self.selected_channels = [0,1]
 
@@ -1385,20 +1382,14 @@ class Trainer(object):
         selected_channels,
         *,
         ema_decay = 0.995,
-        num_frames = 16,
         train_batch_size = 4,
         test_batch_size = 2,
         train_lr = 1.e-4,
         train_num_steps = 100000,
-        gradient_accumulate_every = 2,
-        amp = False,
         step_start_ema = 2000,
         update_ema_every = 10,
         save_and_sample_every = 1000,
-        log_freq = 1,
-        eval_abq_only_final = False,
         results_folder = './results',
-        num_samples = 4,
         preds_per_sample = 4,
         max_grad_norm = None,
         log = True,
@@ -1407,6 +1398,7 @@ class Trainer(object):
         reference_frame = 'eulerian',
         run_name = None,
         accelerator = None,
+        wandb_username = None,
     ):
         super().__init__()
 
@@ -1414,12 +1406,11 @@ class Trainer(object):
 
         if log:
             self.accelerator.init_trackers(
-                project_name='video_diffusion_material_accelerate_final',
+                project_name='metamaterial_diffusion',
                 init_kwargs={
                     'wandb': {
                         'name': run_name,
-                        'notes': 'final runs',
-                        'entity': 'jbastek',
+                        'entity': wandb_username,
                     }
                 },
             )
@@ -1441,13 +1432,9 @@ class Trainer(object):
 
         self.step_start_ema = step_start_ema
         self.save_and_sample_every = save_and_sample_every
-        self.log_freq = log_freq
-        self.eval_abq_only_final = eval_abq_only_final
 
         self.batch_size = train_batch_size
-        self.test_batch_size = test_batch_size
-        self.image_size = diffusion_model.image_size
-        self.gradient_accumulate_every = gradient_accumulate_every
+        self.test_batch_size = test_batch_size // 2 # since evaluation requires more memory
         self.train_num_steps = train_num_steps
 
         image_size = diffusion_model.image_size
@@ -1455,8 +1442,6 @@ class Trainer(object):
         self.num_frames = num_frames
 
         self.selected_channels = selected_channels
-
-        self.reference_frame = reference_frame
 
         self.ds = Dataset(folder, image_size, labels_scaling = None, selected_channels=self.selected_channels, \
             num_frames = num_frames, per_frame_cond = per_frame_cond, reference_frame=reference_frame)
@@ -1468,17 +1453,14 @@ class Trainer(object):
         # create test set, use same normalization as for training set, i.e., same frame range and label scaling
         self.ds_test = Dataset(validation_folder, image_size, labels_scaling=self.ds.labels_scaling, \
             selected_channels=self.selected_channels, num_frames = num_frames, per_frame_cond = per_frame_cond, reference_frame=reference_frame)
-        self.dl_test = self.accelerator.prepare(data.DataLoader(self.ds_test, batch_size = test_batch_size, shuffle=False, pin_memory=True))
+        self.dl_test = self.accelerator.prepare(data.DataLoader(self.ds_test, batch_size = self.test_batch_size, shuffle=False, pin_memory=True))
 
         self.opt = self.accelerator.prepare(Adam(self.model.parameters(), lr = train_lr))
 
-        self.amp = amp
-        self.scaler = GradScaler(enabled = amp)
         self.max_grad_norm = max_grad_norm
 
         self.null_cond_prob = null_cond_prob
 
-        self.num_samples = num_samples
         self.preds_per_sample = preds_per_sample
 
         # reduce number of samples if we have more than 1 process
@@ -1531,7 +1513,6 @@ class Trainer(object):
             model = self.model.state_dict(),
             optimizer = self.opt.state_dict(),
             steps = self.step,
-            scaler = self.scaler.state_dict(),
         )
 
         if self.ema_model is not None:
@@ -1566,7 +1547,6 @@ class Trainer(object):
 
         try:
             self.opt.load_state_dict(loaded_obj['optimizer'])
-            self.scaler.load_state_dict(loaded_obj['scaler'])
         except:
             self.accelerator.print('could not load optimizer and scaler, possibly because you have turned on mixed precision training since the last run. resuming with new optimizer and scalers')
 
@@ -1672,8 +1652,7 @@ class Trainer(object):
         self.accelerator.print('Evaluate target data.')
 
         # eval on target
-        # self.eval_target(target_labels_dir, step = self.step, guidance_scale=guidance_scale)
-        self.eval_target(target_labels_dir, step = self.step-1, guidance_scale=guidance_scale) # TODO this is a hack to make it work with the current code
+        self.eval_target(target_labels_dir, step = self.step, guidance_scale=guidance_scale)
 
     def eval_network(self, prob_focus_present, focus_present_mask, guidance_scale = 5.):
 
@@ -1681,7 +1660,6 @@ class Trainer(object):
 
         if self.accelerator.is_main_process:
             # create folder for each milestone
-            os.makedirs('./' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step), exist_ok=True)
             os.makedirs('./' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/gifs', exist_ok=True)
             
         # compute test loss over full test data
@@ -1716,8 +1694,7 @@ class Trainer(object):
         # bookkeeping
         num_samples = test_cond.shape[0]
         tot_samples = num_samples * self.red_preds_per_sample
-        # batches = num_to_groups(tot_samples, self.batch_size)
-        batches = num_to_groups(tot_samples, 2)
+        batches = num_to_groups(tot_samples, self.test_batch_size)
 
         # create list of indices for each batch
         indices = []
@@ -1758,7 +1735,6 @@ class Trainer(object):
             test_cond = rearrange(test_cond, '(g s) ... -> (s g) ...', \
                 g = self.accelerator.num_processes, s = num_samples)
             # since all GPUs get different conditionings, we set num_samples=num_samples*num_GPUs and do not concatenate predictions from all GPUs
-            # self.save_preds(all_videos_list, test_cond_repeated, num_samples = test_cond_repeated.shape[0], preds_per_sample=self.red_preds_per_sample)
             self.save_preds(all_videos_list, num_samples = num_samples*self.accelerator.num_processes)
 
     def eval_target(
@@ -1781,7 +1757,6 @@ class Trainer(object):
                 eval_idx += 1
             mode = mode + '_' + str(eval_idx)
             
-            os.makedirs('./' + str(self.results_folder) + '/' + mode + '/step_' + str(step), exist_ok=True)
             os.makedirs('./' + str(self.results_folder) + '/' + mode + '/step_' + str(step) + '/gifs', exist_ok=True)
 
         # convert target_labels_dir to tensor
@@ -1901,14 +1876,6 @@ class Trainer(object):
 
             gathered_all_videos = torch.cat(unpadded_all_videos_list, dim = 0)
 
-            # sort the generated samples
-            # NOTE I don't think I need to do below for the setup above.
-            # all_videos_list = rearrange(all_videos_list, '(g s p) ... -> (s g p) ...', \
-            #     g = self.accelerator.num_processes, s = num_samples, p = self.red_preds_per_sample)
-            # since all GPUs get the same conditioning, we set num_samples=num_samples and concatenate the predictions from all GPUs
-            # test_cond is the same for all GPUs, thus we only pass the one from the main process
-            # self.save_preds(all_videos_list, test_cond_full, num_samples=num_samples, preds_per_sample=self.red_preds_per_sample*self.accelerator.num_processes, 
-            #                 step=step, save_sims='False', target_labels=target_labels, mode=mode)
             self.save_preds(gathered_all_videos, num_samples=num_samples, step=step, mode=mode)
 
     def save_preds(self, pred_videos, num_samples, step=None, mode='training'):

@@ -1,4 +1,4 @@
-# training configuration
+# training and model configuration
 batch_size: 4 # per-gpu batch size
 guidance_scale: 5 # classifier-free guidance scaling
 learning_rate: 1.e-4
