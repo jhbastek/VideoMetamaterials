@@ -11,7 +11,7 @@ To reproduce the results from the publication, start by cloning this repository 
 ```
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ``` 
-We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup before training the diffusion model via
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup via ```accelerate config``` before training the diffusion model via
 ```
 accelerate launch main.py
 ```
