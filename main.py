@@ -6,21 +6,23 @@ from src.utils import *
 
 def main():
 
+    ### User input ###
+    wandb_username = None # change to your '<yourusername>' if you want to log to wandb
 
-    # provide wandb username if you want to log to wandb
-    wandb_username = 'jbastek' # None
-
-    # select pretrained run
+    # define run name, if run name already exists, load_model_step must be provided to load model trained to certain step
     run_name = 'run_1'
     load_model_step = None
-
 
     ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
     accelerator = Accelerator(mixed_precision='fp16', kwargs_handlers=[ddp_kwargs], log_with='wandb' if wandb_username is not None else None)
 
+    num_samples = 10  # number of conditionings for which to generate samples
+    num_preds = 1  # number of predictions to generate for each conditioning
+
+
     # store data in given directory
-    scratch_dir = './'
-    run_dir = scratch_dir + 'runs/' + run_name + '/'
+    cur_dir = './'  # local path to repo
+    run_dir = cur_dir + '/runs/' + run_name + '/'
 
     # check if directory exists
     if os.path.exists(run_dir):
@@ -66,13 +68,13 @@ def main():
         channels = len(config['selected_channels']),
         num_frames = 11,
         timesteps = config['train_timesteps'],
-        loss_type = 'l1',  # l1 or l2
+        loss_type = 'l1',
         use_dynamic_thres = config['use_dynamic_thres'],
         sampling_timesteps = config['sampling_timesteps'],
     )
 
-    data_dir = scratch_dir + 'data/' + config['reference_frame'] + '/training/'
-    data_dir_validation = scratch_dir + 'data/' + config['reference_frame'] + '/validation/'
+    data_dir = cur_dir + 'data/' + config['reference_frame'] + '/training/'
+    data_dir_validation = cur_dir + 'data/' + config['reference_frame'] + '/validation/'
 
     trainer = Trainer(
         diffusion,
@@ -84,19 +86,18 @@ def main():
         test_batch_size = config['batch_size'],
         train_lr = config['learning_rate'],
         save_and_sample_every = 20,
-        train_num_steps = 40,
+        train_num_steps = 60,
         ema_decay = 0.995,
-        preds_per_sample = 4,
         log = True,
         null_cond_prob = 0.1,
         per_frame_cond = config['per_frame_cond'],
         reference_frame = config['reference_frame'],
         run_name=run_name,
         accelerator = accelerator,
-        wandb_username = wandb_username,
+        wandb_username = wandb_username
     )
-    trainer.accelerator.print('Number of parameters: ', count_parameters(diffusion))
-    trainer.train(load_model_step=load_model_step)
+
+    trainer.train(load_model_step=load_model_step, num_samples=num_samples, num_preds=num_preds)
 
 if __name__ == '__main__':
     main()
