@@ -1,9 +1,19 @@
-$~$
+<h1 align="center">Inverse-design of nonlinear mechanical metamaterials<br>via video denoising diffusion models</h1>
+<div align="center">
+  <span class="author-block">
+    <a>Jan-Hendrik Bastek</a><sup>1</sup> and</span>
+  <span class="author-block">
+    <a>Dennis M. Kochmann</a><sup>1</sup></span>
+</div>
+<div align="center">
+  <span class="author-block"><sup>1</sup>ETH Zurich</span>
+</div>
 
+$~$
 <p align="center"><img src="pred_light.gif#gh-light-mode-only" width="550"\></p>
 <p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="550"\></p>
 
-# Inverse-design of nonlinear mechanical metamaterials via video denoising diffusion models
+## Introduction
 
 We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code is adapted from the video diffusion architecture proposed by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) based on [Imagen Video](https://imagen.research.google/video/).
 
@@ -11,7 +21,7 @@ To reproduce the results from the publication, start by cloning this repository 
 ```
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ``` 
-We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup before training the diffusion model via
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup via ```accelerate config``` before training the diffusion model via
 ```
 accelerate launch main.py
 ```
