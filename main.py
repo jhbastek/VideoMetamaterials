@@ -9,18 +9,15 @@ from src.utils import *
 def main():
 
     ### User input ###
-
     # define run name, if run name already exists and is not 'pretrained', load_model_step must be provided
     run_name = 'pretrained'
     
     # number of predictions to generate for each conditioning
-    num_preds = 2
+    num_preds = 1
 
-    # change to your '<yourusername>' if you want to log to wandb
+    # change to your '<your_wandb_username>' if you want to log to wandb
     wandb_username = None
-
     ###
-
 
     # initialize distributed training
     dist.init_process_group(backend='gloo')
