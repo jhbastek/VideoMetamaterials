@@ -1,6 +1,4 @@
-import os
-import math
-import copy
+import os, math, copy
 import torch
 from torch import nn, einsum
 import torch.nn.functional as F
@@ -1152,23 +1150,23 @@ class Dataset(data.Dataset):
         assert all([int(p.stem) == i for i, p in enumerate(self.paths_top)]), 'file position is not equal to index'
 
         if reference_frame == 'lagrangian':
-            # load disp_x data
-            disp_x_folder = folder + 'gifs/disp_x/'
-            self.paths_disp_x = [p for ext in exts for p in Path(f'{disp_x_folder}').glob(f'**/*.{ext}')]
+            # load u_1 data
+            u_1_folder = folder + 'gifs/u_1/'
+            self.paths_u_1 = [p for ext in exts for p in Path(f'{u_1_folder}').glob(f'**/*.{ext}')]
             # sort paths by number of name
-            self.paths_disp_x = sorted(self.paths_disp_x, key=lambda x: int(x.name.split('.')[0]))
-            assert all([int(p.stem) == i for i, p in enumerate(self.paths_disp_x)]), 'file position is not equal to index'
+            self.paths_u_1 = sorted(self.paths_u_1, key=lambda x: int(x.name.split('.')[0]))
+            assert all([int(p.stem) == i for i, p in enumerate(self.paths_u_1)]), 'file position is not equal to index'
 
-            assert len(self.paths_disp_x) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
+            assert len(self.paths_u_1) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
-            # load disp_y data
-            disp_y_folder = folder + 'gifs/disp_y/'
-            self.paths_disp_y = [p for ext in exts for p in Path(f'{disp_y_folder}').glob(f'**/*.{ext}')]
+            # load u_2 data
+            u_2_folder = folder + 'gifs/u_2/'
+            self.paths_u_2 = [p for ext in exts for p in Path(f'{u_2_folder}').glob(f'**/*.{ext}')]
             # sort paths by number of name
-            self.paths_disp_y = sorted(self.paths_disp_y, key=lambda x: int(x.name.split('.')[0]))
-            assert all([int(p.stem) == i for i, p in enumerate(self.paths_disp_y)]), 'file position is not equal to index'
+            self.paths_u_2 = sorted(self.paths_u_2, key=lambda x: int(x.name.split('.')[0]))
+            assert all([int(p.stem) == i for i, p in enumerate(self.paths_u_2)]), 'file position is not equal to index'
             
-            assert len(self.paths_disp_y) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
+            assert len(self.paths_u_2) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
                 
         # load mises data
         mises_folder = folder + 'gifs/mises/'
@@ -1180,7 +1178,7 @@ class Dataset(data.Dataset):
         assert len(self.paths_mises) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
         # load s_22 data
-        s_22_folder = folder + 'gifs/s_y/'
+        s_22_folder = folder + 'gifs/s_22/'
         self.paths_s_22 = [p for ext in exts for p in Path(f'{s_22_folder}').glob(f'**/*.{ext}')]
         # sort paths by number of name
         self.paths_s_22 = sorted(self.paths_s_22, key=lambda x: int(x.name.split('.')[0]))
@@ -1197,7 +1195,7 @@ class Dataset(data.Dataset):
 
         assert len(self.paths_ener) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
-        frame_range_file = folder + 'cleaned_frame_range_data.csv'
+        frame_range_file = folder + 'frame_range_data.csv'
         # we manually apply a 'global-min-max-1'-scaling to the gifs, for which we need the original min/max values
         self.frame_ranges = torch.tensor(np.genfromtxt(frame_range_file, delimiter=','))
 
@@ -1207,18 +1205,18 @@ class Dataset(data.Dataset):
             self.max_s_22 = torch.max(self.frame_ranges[:,2])
             self.max_strain_energy = torch.max(self.frame_ranges[:,3])
 
-            self.zero_disp_y = None
+            self.zero_u_2 = None
         elif reference_frame == 'lagrangian':
-            self.min_disp_x = torch.min(self.frame_ranges[:,0])
-            self.max_disp_x = torch.max(self.frame_ranges[:,1])
-            self.min_disp_y = torch.min(self.frame_ranges[:,2])
-            self.max_disp_y = torch.max(self.frame_ranges[:,3])
+            self.min_u_1 = torch.min(self.frame_ranges[:,0])
+            self.max_u_1 = torch.max(self.frame_ranges[:,1])
+            self.min_u_2 = torch.min(self.frame_ranges[:,2])
+            self.max_u_2 = torch.max(self.frame_ranges[:,3])
             self.max_von_Mises = torch.max(self.frame_ranges[:,4])
             self.min_s_22 = torch.min(self.frame_ranges[:,5])
             self.max_s_22 = torch.max(self.frame_ranges[:,6])
             self.max_strain_energy = torch.max(self.frame_ranges[:,7])
 
-            self.zero_disp_y = self.normalize(torch.zeros(1), self.min_disp_y, self.max_disp_y)
+            self.zero_u_2 = self.normalize(torch.zeros(1), self.min_u_2, self.max_u_2)
 
         self.cast_num_frames_fn = partial(cast_num_frames, frames = num_frames) if force_num_frames else identity
 
@@ -1229,7 +1227,7 @@ class Dataset(data.Dataset):
             T.ToTensor()
         ])
 
-        label_file = folder + 'cleaned_stress_strain_data.csv'
+        label_file = folder + 'stress_strain_data.csv'
 
         labels_np = np.genfromtxt(label_file, delimiter=',')
         if per_frame_cond:
@@ -1308,15 +1306,15 @@ class Dataset(data.Dataset):
 
         elif self.reference_frame == 'lagrangian' and self.num_frames != 1:
             paths_top = self.paths_top[index]
-            paths_disp_x = self.paths_disp_x[index]
-            paths_disp_y = self.paths_disp_y[index]
+            paths_u_1 = self.paths_u_1[index]
+            paths_u_2 = self.paths_u_2[index]
             paths_mises = self.paths_mises[index]
             paths_s_22 = self.paths_s_22[index]
 
             topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
 
-            tensor = torch.cat((gif_to_tensor(paths_disp_x, channels=1, transform = self.transform), 
-                                gif_to_tensor(paths_disp_y, channels=1, transform = self.transform),
+            tensor = torch.cat((gif_to_tensor(paths_u_1, channels=1, transform = self.transform), 
+                                gif_to_tensor(paths_u_2, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_mises, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 ), dim=0)
@@ -1334,8 +1332,8 @@ class Dataset(data.Dataset):
                 tensor[i,:,:,:][topologies[0,:,:,:] == 0.] = 0.
 
             # normalize to global range
-            tensor[0,:,:,:] = self.normalize(tensor[0,:,:,:], self.min_disp_x, self.max_disp_x)
-            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_disp_y, self.max_disp_y)
+            tensor[0,:,:,:] = self.normalize(tensor[0,:,:,:], self.min_u_1, self.max_u_1)
+            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_u_2, self.max_u_2)
             tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], 0., self.max_von_Mises)
             tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], self.min_s_22, self.max_s_22)
 
@@ -1477,14 +1475,12 @@ class Trainer(object):
 
     def cond_to_gpu(
         self,
-        cond,
-        num_samples
+        cond
     ):
         # obtain GPU indices
         gpu_index = self.accelerator.process_index
-        # obtain share of test_cond from test_cond_full based on GPU index in continuous blocks
-        tot_preds = len(cond) * num_samples
-        preds_per_gpu = tot_preds // self.accelerator.num_processes
+        # obtain share of preds_per_gpu from cond based on GPU index in continuous blocks
+        preds_per_gpu = len(cond) // self.accelerator.num_processes
         # perform the slicing for each process
         start_idx = gpu_index * preds_per_gpu
         end_idx = (gpu_index + 1) * preds_per_gpu if gpu_index != self.accelerator.num_processes - 1 else cond.shape[0]
@@ -1532,14 +1528,13 @@ class Trainer(object):
         with open(save_dir, 'wb') as f:
             torch.save(save_obj, f)
 
-        self.accelerator.print(f'\ncheckpoint saved to {save_dir}')
+        self.accelerator.print(f'checkpoint saved to {save_dir}')
 
     def load(
         self,
-        step,
         strict = True,
     ):
-        path = str(self.results_folder) + '/model/step_' + str(step) + '/checkpoint.pt'
+        path = str(self.results_folder) + '/model/step_' + str(self.step) + '/checkpoint.pt'
 
         if not os.path.isfile(path):
             raise FileNotFoundError(f'trainer checkpoint not found at {str(path)}. Please check path or run load_model_step = None')
@@ -1553,12 +1548,10 @@ class Trainer(object):
         except RuntimeError:
             print("Failed loading state dict.")
 
-        self.step = (loaded_obj['steps'])
-
         try:
             self.opt.load_state_dict(loaded_obj['optimizer'])
         except:
-            self.accelerator.print('could not load optimizer and scaler, possibly because you have turned on mixed precision training since the last run. resuming with new optimizer and scalers')
+            self.accelerator.print('could not load optimizer, possibly because you have turned on mixed precision training since the last run. resuming with new optimizer')
 
         try:
             self.ema_model.load_state_dict(loaded_obj['ema'], strict = strict)
@@ -1578,16 +1571,20 @@ class Trainer(object):
     ):
         assert callable(self.log_fn)
 
-        # trying to load model trained to given step
+        # try to load model trained to given step
         if load_model_step is not None:
-            self.load(step=load_model_step)
-            # increment step counter since training starts with the next step (for consistency)
-            self.step += 1
+            self.step = load_model_step
+            self.load()
 
         if self.accelerator.is_main_process:
             start_time = time.time() # start timer for tracking purposes
 
         while self.step <= self.train_num_steps:
+            if load_model_step is not None:
+                if load_model_step >= self.train_num_steps:
+                    break  # since model already trained to self.train_num_steps
+                else:
+                    self.step += 1  # since we continue from loaded step
             # accumulate context manager (for gradient accumulation)
             data, cond = next(self.dl)
             with self.accelerator.accumulate(self.model):
@@ -1611,7 +1608,7 @@ class Trainer(object):
                 self.accelerator.wait_for_everyone()
                 self.step_ema()
 
-            if (self.step > 0 and self.step % self.save_and_sample_every == 0) or self.step == self.train_num_steps:
+            if 0 < self.step and self.step % self.save_and_sample_every == 0:
 
                 # verify that all processes have the same step (just to be sure)
                 self.accelerator.wait_for_everyone()
@@ -1633,20 +1630,13 @@ class Trainer(object):
             
             if self.step != self.train_num_steps:
                 self.step += 1
-            else:
+            elif self.step == self.train_num_steps:       
+                # save model at the end of the training
+                self.accelerator.wait_for_everyone()
+                self.save(step=self.step)
                 break
             
         self.accelerator.print('Training completed.')
-            
-        # save model at the end of the training
-        self.accelerator.wait_for_everyone()
-        self.save(step=self.step)
-
-        self.accelerator.print('Evaluate target data.')
-        target_labels_dir = self.folder + './data/target_responses.csv'
-
-        # eval on target data (decrement step since we consider the last step to be the one before the training ended)
-        self.eval_target(target_labels_dir)
 
         # end training
         self.accelerator.end_training()
@@ -1680,14 +1670,15 @@ class Trainer(object):
                 prob_focus_present = prob_focus_present,
                 focus_present_mask = focus_present_mask,
             )
-            if idx in rand_idcs and self.accelerator.is_main_process:
-                test_cond_list.append(cond.clone().detach())
             all_losses = self.accelerator.gather_for_metrics(loss)
             if self.accelerator.is_main_process:
+                if idx in rand_idcs:
+                    test_cond_list.append(cond.clone().detach())
                 loss = torch.mean(all_losses)
                 losses.append(loss.item())
 
         # compute validation loss over full test data
+        test_cond_full_repeated = None
         if self.accelerator.is_main_process:
             test_loss = np.mean(losses)
             self.log_fn({'validation loss': test_loss}, step = self.step)
@@ -1697,31 +1688,39 @@ class Trainer(object):
                 test_cond = torch.cat(test_cond_list, dim=0)[:num_samples,:]
                 # repeat each value of test_cond self.num_samples times
                 test_cond_full_repeated = test_cond.repeat_interleave(num_preds, dim=0)
-            else:
-                test_cond_full_repeated = None
+
+        self.accelerator.wait_for_everyone()
 
         # broadcast test_cond_full_repeated across GPUs
-        self.accelerator.wait_for_everyone()
-        test_cond_full_repeated = broadcast_object_list([test_cond_full_repeated])[0]
+        test_cond_full_repeated = broadcast_object_list([test_cond_full_repeated])[0].to(self.device)
 
         if test_cond_full_repeated is not None:
             # distribute test_cond_full_repeated across available GPUs
-            batched_test_cond = self.cond_to_gpu(test_cond_full_repeated, num_samples)
+            batched_test_cond = self.cond_to_gpu(test_cond_full_repeated)
             # generate samples using each split of test_cond
             ema_model = self.accelerator.unwrap_model(self.ema_model)
             all_videos_list = []
             for cond in batched_test_cond:
                 samples = ema_model.sample(cond=cond, guidance_scale = guidance_scale)
                 all_videos_list.append(samples)
+                
+            self.accelerator.wait_for_everyone()
             # concatenate the generated samples into a single tensor
             all_videos_list = torch.cat(all_videos_list, dim = 0)
+            
             # gather all samples from all processes
             self.accelerator.wait_for_everyone()
-            all_videos_list = self.accelerator.gather(all_videos_list)
-            test_cond = self.accelerator.gather(test_cond)
+
+            # pad across processes since gather needs tensors of equal length
+            padded_all_videos_list = self.accelerator.pad_across_processes(all_videos_list, dim=0)          
+            max_length = padded_all_videos_list.shape[0]
+            gathered_all_videos_list = self.accelerator.gather(padded_all_videos_list)
+            # gather the lengths of the original all_videos_list tensors
+            original_lengths = self.accelerator.gather(torch.tensor(all_videos_list.shape[0]).to(all_videos_list.device))
+
             # do further evaluation on main process
             if self.accelerator.is_main_process:
-                self.save_preds(all_videos_list, num_samples = num_samples)
+                self.save_preds(gathered_all_videos_list, original_lengths, max_length, num_samples=num_samples, mode=mode)
 
     def eval_target(
         self,
@@ -1729,10 +1728,13 @@ class Trainer(object):
         guidance_scale = 5.,
         num_preds = 1
     ):
+        self.accelerator.wait_for_everyone()
+
         assert callable(self.log_fn)
 
         mode = 'eval_target_w_' + str(guidance_scale)
 
+        test_cond_full_repeated = None
         if self.accelerator.is_main_process:
             # create folder for prediction
             eval_idx = 0
@@ -1781,59 +1783,78 @@ class Trainer(object):
         self.accelerator.wait_for_everyone()
 
         # braodcast test_cond_full_repeated across GPUs
-        test_cond_full_repeated = broadcast_object_list([test_cond_full_repeated])[0]
+        test_cond_full_repeated = broadcast_object_list([test_cond_full_repeated])[0].to(self.device)
 
-        # distribute test_cond_full_repeated across available GPUs
-        batched_test_cond = self.cond_to_gpu(test_cond_full_repeated, num_samples)
+        if test_cond_full_repeated is not None:
+            # distribute test_cond_full_repeated across available GPUs
+            batched_test_cond = self.cond_to_gpu(test_cond_full_repeated)
 
-        # generate samples using each split of test_cond
-        ema_model = self.accelerator.unwrap_model(self.ema_model)
-        all_videos_list = []
-        for cond in batched_test_cond:
-            samples = ema_model.sample(cond=cond, guidance_scale = guidance_scale)
-            all_videos_list.append(samples)
+            # generate samples using each split of test_cond
+            ema_model = self.accelerator.unwrap_model(self.ema_model)
+            all_videos_list = []
+            for cond in batched_test_cond:
+                samples = ema_model.sample(cond=cond, guidance_scale = guidance_scale)
+                all_videos_list.append(samples)
 
-        # concatenate the generated samples into a single tensor
-        all_videos_list = torch.cat(all_videos_list, dim = 0)
+            self.accelerator.wait_for_everyone()
+            # concatenate the generated samples into a single tensor
+            all_videos_list = torch.cat(all_videos_list, dim = 0)
 
-        # gather all samples from all processes
-        self.accelerator.wait_for_everyone()
+            # gather all samples from all processes
+            self.accelerator.wait_for_everyone()
 
-        # pad across processes since gather needs tensors of equal length
-        padded_all_videos_list = self.accelerator.pad_across_processes(all_videos_list, dim=0)
-
-        gathered_all_videos_list = self.accelerator.gather(padded_all_videos_list)
-
-        # gather the lengths of the original all_videos_list tensors
-        original_lengths = self.accelerator.gather(torch.tensor(all_videos_list.shape[0]).to(all_videos_list.device))
-
-        # do further evaluation on main process
-        if self.accelerator.is_main_process:
-
-            # Remove padding from the gathered tensor
-            unpadded_all_videos_list = []
+            # pad across processes since gather needs tensors of equal length
+            padded_all_videos_list = self.accelerator.pad_across_processes(all_videos_list, dim=0)
             max_length = padded_all_videos_list.shape[0]
-            start_idx = 0
-            for length in original_lengths:
-                end_idx = start_idx + length
-                unpadded_all_videos_list.append(gathered_all_videos_list[start_idx:end_idx])
-                start_idx += max_length
+            gathered_all_videos_list = self.accelerator.gather(padded_all_videos_list)
+            # gather the lengths of the original all_videos_list tensors
+            original_lengths = self.accelerator.gather(torch.tensor(all_videos_list.shape[0]).to(all_videos_list.device))
 
-            gathered_all_videos = torch.cat(unpadded_all_videos_list, dim = 0)
+            # do further evaluation on main process
+            if self.accelerator.is_main_process:
+                self.save_preds(gathered_all_videos_list, original_lengths, max_length, num_samples=num_samples, mode=mode)
 
-            self.save_preds(gathered_all_videos, num_samples=num_samples, mode=mode)
+
+    def remove_padding(
+        self,
+        gathered_all_videos_list,
+        original_lengths,
+        max_length
+    ):        
+        if len(original_lengths.shape) == 0:
+            # add dimension
+            original_lengths = original_lengths.unsqueeze(0)
+
+        # Remove padding from the gathered tensor
+        unpadded_all_videos_list = []
+        start_idx = 0
+        for length in original_lengths:
+            end_idx = start_idx + length
+            unpadded_all_videos_list.append(gathered_all_videos_list[start_idx:end_idx])
+            start_idx += max_length
+
+        gathered_all_videos = torch.cat(unpadded_all_videos_list, dim = 0)
+
+        return gathered_all_videos
 
     def save_preds(
         self,
-        pred_videos,
+        max_length,
+        gathered_all_videos_list,
+        original_lengths,
         num_samples,
-        mode='training'
-    ):
+        mode = 'training'
+    ):        
+        gathered_all_videos = self.remove_padding(max_length, gathered_all_videos_list, original_lengths)
 
         # save predictions to gifs
-        padded_pred_videos = F.pad(pred_videos, (2, 2, 2, 2))
+        padded_pred_videos = F.pad(gathered_all_videos, (2, 2, 2, 2))
         one_gif = rearrange(padded_pred_videos, '(i j) c f h w -> c f (i h) (j w)', i = num_samples)
 
+        save_dir = './' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/gifs/'
+
         for j, pred_channel in enumerate(self.selected_channels):
-            video_path = './' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/gifs/pred_' + str(pred_channel+1) + '.gif'
+            video_path = save_dir + 'pred_' + str(pred_channel+1) + '.gif'
             video_tensor_to_gif(one_gif[None, j], video_path)
+            
+        self.accelerator.print(f'generated samples saved to {save_dir}')
