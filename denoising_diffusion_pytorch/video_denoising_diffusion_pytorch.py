@@ -1839,13 +1839,13 @@ class Trainer(object):
 
     def save_preds(
         self,
-        max_length,
         gathered_all_videos_list,
-        original_lengths,
+        original_lengths,  
+        max_length,
         num_samples,
         mode = 'training'
-    ):        
-        gathered_all_videos = self.remove_padding(max_length, gathered_all_videos_list, original_lengths)
+    ):
+        gathered_all_videos = self.remove_padding(gathered_all_videos_list, original_lengths, max_length)
 
         # save predictions to gifs
         padded_pred_videos = F.pad(gathered_all_videos, (2, 2, 2, 2))
