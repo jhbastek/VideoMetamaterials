@@ -42,7 +42,7 @@ accelerate launch main.py
 ```
 The generated samples will then be stored in `runs/pretrained/eval_target_w_<guidance_weight>/`. In case of interest, we store the normalization constants to rescale the pixel values to their physical equivalent in `data/<reference_frame>/training/min_max_values.csv`.
 
-To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train new models based on the hyperparameters defined in `model.yaml` (including the option to log to [wandb](https://wandb.ai)).
+To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train new models based on the hyperparameters defined in `model.yaml` (including the option to log to [Weights & Biases](https://wandb.ai)).
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
