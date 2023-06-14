@@ -11,6 +11,11 @@ def main():
     ### User input ###
     # define run name, if run name already exists and is not 'pretrained', load_model_step must be provided
     run_name = 'pretrained'
+
+    if run_name == 'pretrained':
+        load_model_step = 200000  # pretrained model was trained for 200k steps
+    else:
+        load_model_step = None  # train new model (or change this in case you want to load your own pretrained model)
     
     # number of predictions to generate for each conditioning
     num_preds = 1
@@ -34,8 +39,6 @@ def main():
 
     # check if directory exists
     if os.path.exists(run_dir):
-        if run_name == 'pretrained':
-            load_model_step = 200000  # pretrained model was trained for 200k steps
         if load_model_step is None:
             accelerator.print('Directory already exists, please change run_name to train new model or provide load_model_step')
             return
@@ -43,12 +46,13 @@ def main():
         config = yaml.safe_load(Path(run_dir + 'model/model.yaml').read_text())
     else:
         # extract model parameters from created yaml
-        config = yaml.safe_load(Path('model/model.yaml').read_text())
+        config = yaml.safe_load(Path('model.yaml').read_text())
         accelerator.wait_for_everyone()
         # save model parameters in run_dir    
         if accelerator.is_main_process:
             # create folder for all saved files
             os.makedirs(run_dir + '/training')
+            os.makedirs(run_dir + '/model')
             with open(run_dir + 'model/model.yaml', 'w') as file:
                 yaml.dump(config, file)
 

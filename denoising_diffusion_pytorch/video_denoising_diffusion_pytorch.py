@@ -1,4 +1,4 @@
-import os, math, copy
+import os, math, copy, csv
 import torch
 from torch import nn, einsum
 import torch.nn.functional as F
@@ -1205,6 +1205,19 @@ class Dataset(data.Dataset):
             self.max_s_22 = torch.max(self.frame_ranges[:,2])
             self.max_strain_energy = torch.max(self.frame_ranges[:,3])
             self.zero_u_2 = None
+
+            # save min/max values for transforming 
+            data = [
+                ['max_s_mises', self.max_s_mises.item()],
+                ['min_s_22', self.min_s_22.item()],
+                ['max_s_22', self.max_s_22.item()],
+                ['max_strain_energy', self.max_strain_energy.item()]
+            ]
+
+            with open(folder + 'min_max_values.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(data)
+
         elif reference_frame == 'lagrangian':
             self.min_u_1 = torch.min(self.frame_ranges[:,0])
             self.max_u_1 = torch.max(self.frame_ranges[:,1])
@@ -1215,6 +1228,22 @@ class Dataset(data.Dataset):
             self.max_s_22 = torch.max(self.frame_ranges[:,6])
             self.max_strain_energy = torch.max(self.frame_ranges[:,7])
             self.zero_u_2 = self.normalize(torch.zeros(1), self.min_u_2, self.max_u_2)
+
+            # save min/max values for normalization
+            data = [
+                ['min_u_1', self.min_u_1.item()],
+                ['max_u_1', self.max_u_1.item()],
+                ['min_u_2', self.min_u_2.item()],
+                ['max_u_2', self.max_u_2.item()],
+                ['max_s_mises', self.max_s_mises.item()],
+                ['min_s_22', self.min_s_22.item()],
+                ['max_s_22', self.max_s_22.item()],
+                ['max_strain_energy', self.max_strain_energy.item()]
+            ]
+
+            with open(folder + 'min_max_values.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(data)
 
         self.cast_num_frames_fn = partial(cast_num_frames, frames = num_frames) if force_num_frames else identity
 
@@ -1852,7 +1881,7 @@ class Trainer(object):
         save_dir = './' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/gifs/'
 
         for j, pred_channel in enumerate(self.selected_channels):
-            video_path = save_dir + 'pred_' + str(pred_channel+1) + '.gif'
+            video_path = save_dir + 'prediction_channel_' + str(pred_channel) + '.gif'
             video_tensor_to_gif(one_gif[None, j], video_path)
             
         self.accelerator.print(f'generated samples saved to {save_dir}')
