@@ -20,6 +20,9 @@ def main():
     # number of predictions to generate for each conditioning
     num_preds = 1
 
+    # guidance scale as defined in 'Classifier-Free Diffusion Guidance' (https://arxiv.org/abs/2207.12598)
+    guidance_scale = 5.
+
     # change to your '<your_wandb_username>' if you want to log to wandb
     wandb_username = None
     ###
@@ -112,7 +115,7 @@ def main():
     )
 
     trainer.train(load_model_step=load_model_step, num_samples=3, num_preds=num_preds)
-    trainer.eval_target(target_labels_dir, guidance_scale=5., num_preds=num_preds)
+    trainer.eval_target(target_labels_dir, guidance_scale=guidance_scale, num_preds=num_preds)
 
 if __name__ == '__main__':
     main()
