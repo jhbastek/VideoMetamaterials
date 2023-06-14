@@ -1549,7 +1549,7 @@ class Trainer(object):
         try:
             self.opt.load_state_dict(loaded_obj['optimizer'])
         except:
-            self.accelerator.print('could not load optimizer, possibly because you have turned on mixed precision training since the last run. resuming with new optimizer')
+            self.accelerator.print('resuming with new optimizer')
 
         try:
             self.ema_model.load_state_dict(loaded_obj['ema'], strict = strict)
