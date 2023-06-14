@@ -17,14 +17,30 @@ $~$
 
 We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code is adapted from the video diffusion architecture proposed by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) based on [Imagen Video](https://imagen.research.google/video/).
 
-To reproduce the results from the publication, start by cloning this repository via
+To conduct similar studies as those presented in the publication, start by cloning this repository via
 ```
 git clone https://github.com/jhbastek/VideoMetamaterials.git
-``` 
-We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training. Please first configure your setup via ```accelerate config``` before training the diffusion model via
+```
+
+Then download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Place `target_responses.csv`, the unzipped `lagrangian` folder as well as the unzipped `pretrained` folder (containing model checkpoints) in the following directories. Note that the `eulerian` dataset must only be provided when considering the Eulerian frame, which was only used in preliminary studies but included for completeness.
+```
+.
+├── data
+│   ├── target_responses.csv
+│   └── lagrangian
+│   │   └── ...
+│   └── eulerian
+│       └── ...
+└── runs
+    └── pretrained
+        └── ...
+```
+
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training when a multi GPU environment is available. Please first configure your setup via ```accelerate config``` before training the diffusion model via
 ```
 accelerate launch main.py
 ```
+Note that `accelerate` can also be used in single GPU setups.
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
