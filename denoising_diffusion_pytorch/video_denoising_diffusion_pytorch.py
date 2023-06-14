@@ -1663,7 +1663,7 @@ class Trainer(object):
                 self.save(step=self.step)
                 break
             
-        self.accelerator.print('Training completed.')
+        self.accelerator.print('training completed')
 
         # end training
         self.accelerator.end_training()
