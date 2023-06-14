@@ -29,7 +29,7 @@ Then download the data and model checkpoints provided in the [ETHZ Research Coll
 │   ├── target_responses.csv
 │   └── lagrangian
 │   │   └── ...
-│   └── eulerian
+│   └── eulerian (optional)
 │       └── ...
 └── runs
     └── pretrained
