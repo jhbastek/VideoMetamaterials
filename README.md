@@ -22,7 +22,7 @@ To conduct similar studies as those presented in the publication, start by cloni
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ```
 
-Next, download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Unzip `lagrangian.zip` in the `data` folder and `pretrained.zip` in the `runs` folder, so that the directories are as shown below. Note that the `eulerian` dataset must only be provided when training the model with full-field data in the Eulerian frame, which was only used in preliminary studies but included for completeness.
+Next, download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Unzip the training data `lagrangian.zip` in the `data` folder and the pretrained model `pretrained.zip` in the `runs` folder, so that the directories are as shown below. Note that the `eulerian` dataset must only be provided when training the model with full-field data in the Eulerian frame, which was only used in preliminary studies but included for completeness.
 ```
 .
 ├── data
