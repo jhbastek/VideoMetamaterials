@@ -22,7 +22,7 @@ To conduct similar studies as those presented in the publication, start by cloni
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ```
 
-Then download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Place `target_responses.csv`, the unzipped `lagrangian` folder as well as the unzipped `pretrained` folder (containing model checkpoints) in the following directories. Note that the `eulerian` dataset must only be provided when considering the Eulerian frame, which was only used in preliminary studies but included for completeness.
+Then download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Place the unzipped `lagrangian` folder as well as the unzipped `pretrained` folder (containing model checkpoints) in the following directories. Note that the `eulerian` dataset must only be provided when considering the Eulerian frame, which was only used in preliminary studies but included for completeness.
 ```
 .
 ├── data
