@@ -1169,13 +1169,13 @@ class Dataset(data.Dataset):
             assert len(self.paths_u_2) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
                 
         # load mises data
-        mises_folder = folder + 'gifs/mises/'
-        self.paths_mises = [p for ext in exts for p in Path(f'{mises_folder}').glob(f'**/*.{ext}')]
+        s_mises_folder = folder + 'gifs/s_mises/'
+        self.paths_s_mises = [p for ext in exts for p in Path(f'{s_mises_folder}').glob(f'**/*.{ext}')]
         # sort paths by number of name
-        self.paths_mises = sorted(self.paths_mises, key=lambda x: int(x.name.split('.')[0]))
-        assert all([int(p.stem) == i for i, p in enumerate(self.paths_mises)]), 'file position is not equal to index'
+        self.paths_s_mises = sorted(self.paths_s_mises, key=lambda x: int(x.name.split('.')[0]))
+        assert all([int(p.stem) == i for i, p in enumerate(self.paths_s_mises)]), 'file position is not equal to index'
 
-        assert len(self.paths_mises) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
+        assert len(self.paths_s_mises) == len(self.paths_top), 'number of files in fields and top folders are not equal.'
 
         # load s_22 data
         s_22_folder = folder + 'gifs/s_22/'
@@ -1200,22 +1200,20 @@ class Dataset(data.Dataset):
         self.frame_ranges = torch.tensor(np.genfromtxt(frame_range_file, delimiter=','))
 
         if reference_frame == 'eulerian':
-            self.max_von_Mises = torch.max(self.frame_ranges[:,0])
+            self.max_s_mises = torch.max(self.frame_ranges[:,0])
             self.min_s_22 = torch.min(self.frame_ranges[:,1])
             self.max_s_22 = torch.max(self.frame_ranges[:,2])
             self.max_strain_energy = torch.max(self.frame_ranges[:,3])
-
             self.zero_u_2 = None
         elif reference_frame == 'lagrangian':
             self.min_u_1 = torch.min(self.frame_ranges[:,0])
             self.max_u_1 = torch.max(self.frame_ranges[:,1])
             self.min_u_2 = torch.min(self.frame_ranges[:,2])
             self.max_u_2 = torch.max(self.frame_ranges[:,3])
-            self.max_von_Mises = torch.max(self.frame_ranges[:,4])
+            self.max_s_mises = torch.max(self.frame_ranges[:,4])
             self.min_s_22 = torch.min(self.frame_ranges[:,5])
             self.max_s_22 = torch.max(self.frame_ranges[:,6])
             self.max_strain_energy = torch.max(self.frame_ranges[:,7])
-
             self.zero_u_2 = self.normalize(torch.zeros(1), self.min_u_2, self.max_u_2)
 
         self.cast_num_frames_fn = partial(cast_num_frames, frames = num_frames) if force_num_frames else identity
@@ -1278,12 +1276,12 @@ class Dataset(data.Dataset):
 
         if self.reference_frame == 'eulerian':
             paths_top = self.paths_top[index]
-            paths_mises = self.paths_mises[index]
+            paths_s_mises = self.paths_s_mises[index]
             paths_s_22 = self.paths_s_22[index]
             paths_ener = self.paths_ener[index]
 
             tensor = torch.cat((gif_to_tensor(paths_top, channels=1, transform = self.transform), 
-                                gif_to_tensor(paths_mises, channels=1, transform = self.transform),
+                                gif_to_tensor(paths_s_mises, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_ener, channels=1, transform = self.transform),
                                 ), dim=0)
@@ -1300,7 +1298,7 @@ class Dataset(data.Dataset):
                 tensor[i,:,:,:][topologies[0,:,:,:] == 0.] = 0.
 
             # normalize to global range
-            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], 0., self.max_von_Mises)
+            tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], 0., self.max_s_mises)
             tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], self.min_s_22, self.max_s_22)
             tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], 0., self.max_strain_energy)
 
@@ -1308,14 +1306,14 @@ class Dataset(data.Dataset):
             paths_top = self.paths_top[index]
             paths_u_1 = self.paths_u_1[index]
             paths_u_2 = self.paths_u_2[index]
-            paths_mises = self.paths_mises[index]
+            paths_s_mises = self.paths_s_mises[index]
             paths_s_22 = self.paths_s_22[index]
 
             topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
 
             tensor = torch.cat((gif_to_tensor(paths_u_1, channels=1, transform = self.transform), 
                                 gif_to_tensor(paths_u_2, channels=1, transform = self.transform),
-                                gif_to_tensor(paths_mises, channels=1, transform = self.transform),
+                                gif_to_tensor(paths_s_mises, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
                                 ), dim=0)
             
@@ -1334,13 +1332,13 @@ class Dataset(data.Dataset):
             # normalize to global range
             tensor[0,:,:,:] = self.normalize(tensor[0,:,:,:], self.min_u_1, self.max_u_1)
             tensor[1,:,:,:] = self.normalize(tensor[1,:,:,:], self.min_u_2, self.max_u_2)
-            tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], 0., self.max_von_Mises)
+            tensor[2,:,:,:] = self.normalize(tensor[2,:,:,:], 0., self.max_s_mises)
             tensor[3,:,:,:] = self.normalize(tensor[3,:,:,:], self.min_s_22, self.max_s_22)
 
         # only relevant for ablation study, where we consider two channels (topology and sigma_22)
         elif self.reference_frame == 'lagrangian' and self.num_frames == 1:
             paths_top = self.paths_top[index]
-            paths_mises = self.paths_mises[index]
+            paths_s_mises = self.paths_s_mises[index]
             paths_s_22 = self.paths_s_22[index]
 
             topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
