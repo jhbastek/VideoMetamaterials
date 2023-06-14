@@ -13,7 +13,7 @@ $~$
 <p align="center"><img src="pred_light.gif#gh-light-mode-only" width="550"\></p>
 <p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="550"\></p>
 
-## Introduction
+## Introduction & Setup
 
 We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code is adapted from the video diffusion architecture proposed by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) based on [Imagen Video](https://imagen.research.google/video/).
 
@@ -22,7 +22,7 @@ To conduct similar studies as those presented in the publication, start by cloni
 git clone https://github.com/jhbastek/VideoMetamaterials.git
 ```
 
-Then download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Place the unzipped `lagrangian` folder as well as the unzipped `pretrained` folder (containing model checkpoints) in the following directories. Note that the `eulerian` dataset must only be provided when considering the Eulerian frame, which was only used in preliminary studies but included for completeness.
+Then download the data and model checkpoints provided in the [ETHZ Research Collection](tbd). Place the unzipped `lagrangian` folder as well as the unzipped `pretrained` folder (containing model checkpoints) in the following directories. Note that the `eulerian` dataset must only be provided when training the model with full-field data in the Eulerian frame, which was only used in preliminary studies but included for completeness.
 ```
 .
 ├── data
@@ -36,11 +36,13 @@ Then download the data and model checkpoints provided in the [ETHZ Research Coll
         └── ...
 ```
 
-We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training when a multi GPU environment is available. Please first configure your setup via ```accelerate config``` before training the diffusion model via
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training when a multi GPU environment is available. Please first configure your setup via `accelerate config` (note that `accelerate` can also be used in single GPU setups). To then generate new metamaterial samples simply run
 ```
 accelerate launch main.py
 ```
-Note that `accelerate` can also be used in single GPU setups.
+The generated samples will then be stored in `runs/pretrained/eval_target_w_<guidance_weight>/`. In case of interest, we store the normalization constants to rescale the pixel values to their physical equivalent in `data/<reference_frame>/training/min_max_values.csv`.
+
+To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train new models based on the parameters given in `model.yaml` (including the option to log to `wandb`).
 
 For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
