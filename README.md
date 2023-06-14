@@ -36,7 +36,7 @@ Then download the data and model checkpoints provided in the [ETHZ Research Coll
         └── ...
 ```
 
-We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training when a multi GPU environment is available. Please first configure your setup via `accelerate config` (note that `accelerate` can also be used in single GPU/CPU setups). To then generate new metamaterial samples simply run
+We use the [Accelerate](https://huggingface.co/docs/accelerate/index) library to speed up training when a multi GPU environment is available. Please first configure your setup via `accelerate config` (note that `accelerate` can also be used in single GPU/CPU setups). To then generate new metamaterial samples conditioned on the stress-strain responses provided in `data/target_responses.csv` simply run
 ```
 accelerate launch main.py
 ```
