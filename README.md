@@ -42,7 +42,7 @@ To generate new metamaterial samples conditioned on the stress-strain responses 
 ```
 accelerate launch main.py
 ```
-The generated samples will then be stored in `runs/pretrained/eval_target_w_<guidance_weight>/` and should perform similar to the presented samples. In case of interest, we store the normalization constants to rescale the pixel values to their physical equivalent in `data/<reference_frame>/training/min_max_values.csv`. To condition the denoising process on your wnw stress-strain responses, simply adjust `target_responses.csv` accordingly. Sample generation takes around 1 minute on a single Nvidia Quadro RTX 6000.
+The generated samples will then be stored in `runs/pretrained/eval_target_w_<guidance_weight>/` and should perform similar to the presented samples. In case of interest, we store the normalization constants to rescale the pixel values to their physical equivalent in `data/<reference_frame>/training/min_max_values.csv`. To condition the denoising process on your own stress-strain responses, simply adjust `target_responses.csv` accordingly. Sample generation takes around 1 minute on a single Nvidia Quadro RTX 6000.
 
 To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train new models based on the hyperparameters defined in `model.yaml` (including the option to log to [Weights & Biases](https://wandb.ai)).
 
