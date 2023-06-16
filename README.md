@@ -15,7 +15,7 @@ $~$
 
 ## Introduction & Setup
 
-We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code is adapted from the video diffusion architecture proposed by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) based on [Imagen Video](https://imagen.research.google/video/).
+We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code extends the video denoising diffusion implementation by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) proposed in [Imagen Video](https://imagen.research.google/video/).
 
 To conduct similar studies as those presented in the publication, start by cloning this repository via
 ```
