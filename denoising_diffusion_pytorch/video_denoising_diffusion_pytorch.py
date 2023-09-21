@@ -1309,6 +1309,8 @@ class Dataset(data.Dataset):
             paths_s_22 = self.paths_s_22[index]
             paths_ener = self.paths_ener[index]
 
+            topologies = gif_to_tensor(paths_top, channels=1, transform = self.transform)
+
             tensor = torch.cat((gif_to_tensor(paths_top, channels=1, transform = self.transform), 
                                 gif_to_tensor(paths_s_mises, channels=1, transform = self.transform),
                                 gif_to_tensor(paths_s_22, channels=1, transform = self.transform),
