@@ -1,4 +1,8 @@
 <h1 align="center">Inverse-design of nonlinear mechanical metamaterials<br>via video denoising diffusion models</h1>
+<h4 align="center">
+<a href="https://doi.org/10.5281/zenodo.10011767"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10011767.svg" alt="DOI"></a>  
+<a href="https://arxiv.org/abs/2305.19836"><img src="https://img.shields.io/badge/arXiv-2305.19836-blue" alt="arXiv"></a>
+</h4>
 <div align="center">
   <span class="author-block">
     <a>Jan-Hendrik Bastek</a><sup>1</sup> and</span>
@@ -14,7 +18,6 @@ $~$
 <p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="550"\></p>
 
 ## Introduction & Setup
-
 We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code extends the video denoising diffusion implementation by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) proposed in [Imagen Video](https://imagen.research.google/video/).
 
 To conduct similar studies as those presented in the publication, start by cloning this repository via
