@@ -1,7 +1,7 @@
 <h1 align="center">Inverse-design of nonlinear mechanical metamaterials<br>via video denoising diffusion models</h1>
 <h4 align="center">
-<a href="https://doi.org/10.5281/zenodo.10011767"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10011767.svg" alt="DOI"></a>  
 <a href="https://arxiv.org/abs/2305.19836"><img src="https://img.shields.io/badge/arXiv-2305.19836-blue" alt="arXiv"></a>
+<a href="https://doi.org/10.5281/zenodo.10011767"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10011767.svg" alt="DOI"></a>  
 </h4>
 <div align="center">
   <span class="author-block">
@@ -18,7 +18,9 @@ $~$
 <p align="center"><img src="pred_dark.gif#gh-dark-mode-only" width="550"\></p>
 
 ## Introduction & Setup
-We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [TBA]. The code extends the video denoising diffusion implementation by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) proposed in [Imagen Video](https://imagen.research.google/video/).
+We introduce a framework to create mechanical metamaterials with a given nonlinear stress-strain response via video denoising diffusion as described in [Inverse design of nonlinear mechanical metamaterials via video denoising diffusion models](https://www.nature.com/articles/s42256-023-00762-x).
+
+This code is based on the video denoising diffusion implementation by [Phil Wang](https://github.com/lucidrains/imagen-pytorch) proposed in [Imagen Video](https://imagen.research.google/video/).
 
 To conduct similar studies as those presented in the publication, start by cloning this repository via
 ```
@@ -51,7 +53,7 @@ To condition the denoising process on your own stress-strain responses, simply a
 
 To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train denoising models from scratch based on the hyperparameters defined in `model.yaml` (including the option to log to [Weights & Biases](https://wandb.ai)).
 
-For further information, please first refer to the [TBA], the Supporting Information [TBA] or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
+For further information, please first refer to the [publication](https://www.nature.com/articles/s42256-023-00762-x), the [Supplementary Information](https://www.nature.com/articles/s42256-023-00762-x#Sec18) or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
 ## Dependencies
 
@@ -69,5 +71,16 @@ Package | Version (>=)
 
 ## Citation
 
-If this code is useful for your research, please cite [TBA].
+If this code is useful for your research, please cite our [publication](https://www.nature.com/articles/s42256-023-00762-x).
+```bibtex
+@article{Bastek2023,
+author = {Bastek, Jan-Hendrik and Kochmann, Dennis M.},
+doi = {10.1038/s42256-023-00762-x},
+journal = {Nature Machine Intelligence},
+pages = {104849},
+title = {{Inverse design of nonlinear mechanical metamaterials via video denoising diffusion models}},
+url = {https://doi.org/10.1038/s42256-023-00762-x},
+volume = {12},
+year = {2023}
+}
 
