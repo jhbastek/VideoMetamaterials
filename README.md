@@ -77,7 +77,6 @@ If this code is useful for your research, please cite our [publication](https://
 author = {Bastek, Jan-Hendrik and Kochmann, Dennis M.},
 doi = {10.1038/s42256-023-00762-x},
 journal = {Nature Machine Intelligence},
-pages = {104849},
 title = {{Inverse design of nonlinear mechanical metamaterials via video denoising diffusion models}},
 url = {https://doi.org/10.1038/s42256-023-00762-x},
 volume = {12},
