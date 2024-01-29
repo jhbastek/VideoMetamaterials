@@ -53,7 +53,7 @@ To condition the denoising process on your own stress-strain responses, simply a
 
 To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train denoising models from scratch based on the hyperparameters defined in `model.yaml` (including the option to log to [Weights & Biases](https://wandb.ai)).
 
-For further information, please first refer to the [publication](https://www.nature.com/articles/s42256-023-00762-x), the [Supplementary Information](https://www.nature.com/articles/s42256-023-00762-x#Sec18) or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
+For further information, please first refer to the [publication](https://www.nature.com/articles/s42256-023-00762-x), the [Supplementary Information](https://www.nature.com/articles/s42256-023-00762-x#Sec18) or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch). If you are interested in the Abaqus scripts, please also reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
 
 ## Dependencies
 
