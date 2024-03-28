@@ -57,7 +57,7 @@ For further information, please first refer to the [publication](https://www.nat
 
 ## FEM evaluation via Abaqus
 
-We also provide the scripts to evaluate the generated designs via Abaqus CAE 2020. For this, run `eval_abaqus.py` with the path to the predicted samples that should contain a `geometries.csv` file with the binary pixel predictions. Predictions are stored in row-wise order in this file, and you must provide the `sample_index` corresponding to the row you want to evaluate. Note that `eval_abaqus.py` is a wrapper that will call `abaqus cae`, therefore make sure that you can run Abaqus from the command line. Functionality was verified on Microsoft Windows 10 OS.
+We also provide the scripts to evaluate the generated designs via Abaqus CAE 2020. For this, run `eval_abaqus.py` with the path to the predicted samples that should contain a `geometries.csv` file with the binary pixel predictions. Predictions are stored in row-wise order in this file, and you must provide the `sample_index` corresponding to the row you want to evaluate. Note that `eval_abaqus.py` is a wrapper that will call `abaqus cae`, therefore make sure that you can run Abaqus from the command line. Functionality was verified on Microsoft Windows 10 OS. As mentioned in the publication, we have typically generated 10 samples and provided the best match. Similarly, more samples are likely necessary to obtain a good match for highly exotic stress-strain responses, while a single sample may suffice for simpler curves (such as the one presented in Fig. 3a of the publication).
 
 ## Dependencies
 
