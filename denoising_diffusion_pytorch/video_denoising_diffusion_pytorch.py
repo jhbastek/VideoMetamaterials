@@ -1492,6 +1492,7 @@ class Trainer(object):
         self.num_processes = self.accelerator.num_processes
 
         self.folder = folder
+        self.reference_frame = reference_frame
 
     def reset_parameters(self):
         self.ema_model.load_state_dict(self.model.state_dict())
@@ -1880,10 +1881,39 @@ class Trainer(object):
         padded_pred_videos = F.pad(gathered_all_videos, (2, 2, 2, 2))
         one_gif = rearrange(padded_pred_videos, '(i j) c f h w -> c f (i h) (j w)', i = num_samples)
 
-        save_dir = './' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/gifs/'
+        save_dir = './' + str(self.results_folder) + '/' + mode + '/step_' + str(self.step) + '/'
 
         for j, pred_channel in enumerate(self.selected_channels):
-            video_path = save_dir + 'prediction_channel_' + str(pred_channel) + '.gif'
+            video_path = save_dir + 'gifs/prediction_channel_' + str(pred_channel) + '.gif'
             video_tensor_to_gif(one_gif[None, j], video_path)
-            
+
+        # save geometry for Abaqus evaluation
+        # only consider the lower left quarter of the frame
+        pixels = gathered_all_videos.shape[-1]
+        if self.reference_frame == 'eulerian' or (self.reference_frame == 'lagrangian' and self.num_frames == 1):
+            # extract bottom left quarter as usual convention
+            gathered_all_videos_red = gathered_all_videos[:,:,:,pixels//2:,:pixels//2].detach().clone()
+            # extract the first frame and channel of each video as topology, 
+            topologies = gathered_all_videos_red[:,0,0,:,:]
+        elif self.reference_frame == 'lagrangian':
+            # extract upper left quarter since we evaluate disp_y, which will be nonzero there
+            gathered_all_videos_red = gathered_all_videos[:,:,:,:pixels//2,:pixels//2].detach().clone()
+            # mirror the tensor along the x-axis of pixels
+            gathered_all_videos_red = gathered_all_videos_red.flip(-2)
+            # extract topology by considering all pixels that have close to 0 disp_y in all frames    
+            topologies = torch.zeros((gathered_all_videos_red.shape[0], pixels//2, pixels//2), device=self.device)            
+            for i in range(gathered_all_videos_red.shape[0]):
+                # check pixels that have close to 0 disp_y in each frame
+                close_to_value = torch.isclose(gathered_all_videos_red[i, 1, :, :, :], self.ds.zero_u_2.to(self.device), atol=0.02)
+                # check if pixels are close to 0 in all frames
+                all_frames_match = torch.all(close_to_value, dim=0)
+                # set topology to 1 where pixels are NOT close to 0 in all frames
+                topologies[i,:,:] = torch.logical_not(all_frames_match)
+        # NOTE: Important to transpose topologies to ensure consistency with Abaqus
+        topologies = topologies.permute(0,2,1)
+        geom_pred = topologies.cpu().detach().numpy()
+        # binarize and remove floating material
+        pixels_red = geom_pred.shape[1]
+        geom_pred_red = clean_pred(geom_pred, pixels_red)
+        np.savetxt(save_dir + 'geometries.csv', geom_pred_red, delimiter=',', comments='')
         self.accelerator.print(f'generated samples saved to {save_dir}')
