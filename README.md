@@ -53,7 +53,11 @@ To condition the denoising process on your own stress-strain responses, simply a
 
 To experiment with different setups simply change the user input in `main.py`. Here you can adjust the number of generated samples per conditioning, change the guidance scaling `w` or also train denoising models from scratch based on the hyperparameters defined in `model.yaml` (including the option to log to [Weights & Biases](https://wandb.ai)).
 
-For further information, please first refer to the [publication](https://www.nature.com/articles/s42256-023-00762-x), the [Supplementary Information](https://www.nature.com/articles/s42256-023-00762-x#Sec18) or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch). If you are interested in the Abaqus scripts, please also reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
+For further information, please first refer to the [publication](https://www.nature.com/articles/s42256-023-00762-x), the [Supplementary Information](https://www.nature.com/articles/s42256-023-00762-x#Sec18) or reach out to [Jan-Hendrik Bastek](mailto:jbastek@ethz.ch).
+
+## FEM evaluation via Abaqus
+
+We also provide the scripts to evaluate the generated designs via Abaqus CAE 2020. For this, run `eval_abaqus.py` with the path to the predicted samples that should contain a `geometries.csv` file with the binary pixel predictions. Predictions are stored in row-wise order in this file, and you must provide the `sample_index` corresponding to the row you want to evaluate. Note that `eval_abaqus.py` is a wrapper that will call `abaqus cae`, therefore make sure that you can run Abaqus from the command line. Functionality was verified on Microsoft Windows 10 OS.
 
 ## Dependencies
 
@@ -67,7 +71,9 @@ Package | Version (>=)
 `accelerate`    | `0.19.0`
 `imageio`       | `2.28.1`
 `tqdm`          | `4.65.0`
+`networkx`          | `2.8.4`
 `wandb` (optional)        | `0.15.2`
+`Abaqus CAE` (optional)        | `2020`
 
 ## Citation
 
