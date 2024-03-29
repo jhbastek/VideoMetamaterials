@@ -18,7 +18,7 @@ import argparse
 import numpy as np
 
 parser = argparse.ArgumentParser(description="Evaluate the stress-strain response of given pixel-based structures.")
-parser.add_argument('--samples_path', type=str, required=False, default='./', help='Path to samples to evaluate.')
+parser.add_argument('--samples_path', type=str, required=True, help='Path to samples to evaluate.')
 parser.add_argument('--sample_index', type=int, required=True, help='Index of sample to evaluate.')
 parser.add_argument('--store_frames', type=bool, required=False, default=False, help='Store frames of simulation as np array. Takes some time.')
 parser.add_argument('--pixels', type=int, required=False, default=48, help='Number of pixels')
@@ -66,15 +66,12 @@ part_name = 'Part-1'
 material_name = 'Material-1'
 job_name = 'Job-1'
 
-if samples_path == './':
-    save_path = './csv/'
-else:
-    save_path = os.path.join(samples_path, 'abaqus', 'csv')
-    try:
-        os.makedirs(save_path)
-    except OSError as e:
-        if e.errno != os.errno.EEXIST:  # Check if the error is "File exists"
-            raise  # Re-raise the exception if it's not "File exists"
+save_path = os.path.join(samples_path, 'abaqus_eval_sample_{}'.format(sample_index), 'csv')
+try:
+    os.makedirs(save_path)
+except OSError as e:
+    if e.errno != os.errno.EEXIST:
+        raise
 
 m = mdb.models[model_name]
 
