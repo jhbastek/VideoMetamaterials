@@ -17,8 +17,6 @@ def main():
 
     pixels = 96//2 # since we only consider one quarter
 
-    abaqus_path = os.path.join(samples_path, 'abaqus_eval_sample_{}'.format(sample_index))
-
     # grf sampling properties
     if sample_grf:
         grf_alpha = 6
@@ -26,12 +24,12 @@ def main():
         grf_threshold_rel = 0.5
         grf_geometry = generate_geometry(grf_alpha, pixels, pixel_threshold_rel, grf_threshold_rel)
         samples_path = 'grf_sample/'
-        sample_index = 0
+        sample_index = 0    
         os.makedirs(samples_path, exist_ok=True)
         np.savetxt(os.path.join(samples_path, 'geometries.csv'), grf_geometry, delimiter=',')
-        abaqus_path = os.path.join(samples_path, 'abaqus_grf')
 
-    # change dir to abaqus_path to store abaqus output more conveniently    
+    # change dir to abaqus_path to store abaqus output more conveniently
+    abaqus_path = os.path.join(samples_path, 'abaqus_eval_sample_{}'.format(sample_index)) 
     original_dir = os.getcwd()
     os.makedirs(abaqus_path, exist_ok=True)
     os.chdir(abaqus_path)
