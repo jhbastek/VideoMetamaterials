@@ -26,6 +26,7 @@ def main():
         grf_threshold_rel = 0.5
         grf_geometry = generate_geometry(grf_alpha, pixels, pixel_threshold_rel, grf_threshold_rel)
         samples_path = 'grf_sample/'
+        sample_index = 0
         os.makedirs(samples_path, exist_ok=True)
         np.savetxt(os.path.join(samples_path, 'geometries.csv'), grf_geometry, delimiter=',')
         abaqus_path = os.path.join(samples_path, 'abaqus_grf')
