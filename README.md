@@ -73,7 +73,8 @@ Package | Version (>=)
 `tqdm`          | `4.65.0`
 `networkx`          | `2.8.4`
 `wandb` (optional)        | `0.15.2`
-`Abaqus CAE` (optional)        | `2020`
+
+To run the FEM simulations a license of Abaqus CAE 2020 is required.
 
 ## Citation
 
