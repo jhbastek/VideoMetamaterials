@@ -13,7 +13,7 @@ def main():
 
     sample_grf = False # use to sample random grf instead of given geometry
     create_gifs = True # create gif of abaqus simulation
-    gif_reference_frame = 'eulerian' # store gif in Eulerian or Lagrangian reference frame
+    gif_reference_frame = 'eulerian' # 'eulerian', 'lagrangian' # store gif in Eulerian or Lagrangian reference frame
 
     pixels = 96//2 # since we only consider one quarter
 
@@ -59,66 +59,66 @@ def main():
             gif_pixels = int(2*pixels)
             if gif_reference_frame == 'eulerian':
                 geom_frames = np.genfromtxt(os.path.join('csv', 'geometry_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
-                von_mises_frames = np.genfromtxt(os.path.join('csv', 'von_Mises_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
-                S_y_frames = np.genfromtxt(os.path.join('csv', 's_22_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                s_mises_frames = np.genfromtxt(os.path.join('csv', 's_mises_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                s_22_frames = np.genfromtxt(os.path.join('csv', 's_22_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
                 strain_energy_frames = np.genfromtxt(os.path.join('csv', 'strain_energy_dens_frames_eul.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
 
                 # convert data to uint8 and store scaling
-                max_von_Mises = np.max(von_mises_frames)
-                min_S_y = np.min(S_y_frames)
-                max_S_y = np.max(S_y_frames)
+                max_s_mises = np.max(s_mises_frames)
+                min_s_22 = np.min(s_22_frames)
+                max_s_22 = np.max(s_22_frames)
                 max_strain_energy = np.max(strain_energy_frames)
-                frame_ranges = np.array([max_von_Mises, min_S_y, max_S_y, max_strain_energy])
-                frame_ranges_header = ['max_von_Mises', 'min_S_y', 'max_s_22', 'max_strain_energy']
+                frame_range = np.array([max_s_mises, min_s_22, max_s_22, max_strain_energy])
+                frame_range_header = ['max_s_mises', 'min_s_22', 'max_s_22', 'max_strain_energy']
 
                 # rescale data to [0,1]
-                if not frame_ranges.any() == 0:
-                    von_mises_frames = von_mises_frames / max_von_Mises
-                    S_y_frames = (S_y_frames - min_S_y) / (max_S_y - min_S_y)
+                if not frame_range.any() == 0:
+                    s_mises_frames = s_mises_frames / max_s_mises
+                    s_22_frames = (s_22_frames - min_s_22) / (max_s_22 - min_s_22)
                     strain_energy_frames = strain_energy_frames / max_strain_energy
 
                 geom_frames = (geom_frames * 255).astype(np.uint8)
-                von_mises_frames = (von_mises_frames * 255).astype(np.uint8)
-                S_y_frames = (S_y_frames * 255).astype(np.uint8)
+                s_mises_frames = (s_mises_frames * 255).astype(np.uint8)
+                s_22_frames = (s_22_frames * 255).astype(np.uint8)
                 strain_energy_frames = (strain_energy_frames * 255).astype(np.uint8)
 
                 # stack all frames at the end for consistent gif creation
-                full_frames = np.stack((geom_frames, von_mises_frames, S_y_frames, strain_energy_frames), axis=-1).astype(np.uint8)
+                full_frames = np.stack((geom_frames, s_mises_frames, s_22_frames, strain_energy_frames), axis=-1).astype(np.uint8)
 
             elif gif_reference_frame == 'lagrangian':
                     
-                disp_x_frames = np.genfromtxt(os.path.join('csv', 'x_disp_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
-                disp_y_frames = np.genfromtxt(os.path.join('csv', 'y_disp_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
-                von_mises_frames = np.genfromtxt(os.path.join('csv', 'von_Mises_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
-                S_y_frames = np.genfromtxt(os.path.join('csv', 's_22_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                u_1_frames = np.genfromtxt(os.path.join('csv', 'u_1_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                u_2_frames = np.genfromtxt(os.path.join('csv', 'u_2_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                s_mises_frames = np.genfromtxt(os.path.join('csv', 's_mises_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
+                s_22_frames = np.genfromtxt(os.path.join('csv', 's_22_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
                 strain_energy_frames = np.genfromtxt(os.path.join('csv', 'strain_energy_dens_frames_lagr.csv'), delimiter=',').reshape(-1,gif_pixels,gif_pixels)
 
                 # convert data to uint8 and store scaling
-                min_disp_x = np.min(disp_x_frames)
-                max_disp_x = np.max(disp_x_frames)
-                min_disp_y = np.min(disp_y_frames)
-                max_disp_y = np.max(disp_y_frames)
-                max_von_Mises = np.max(von_mises_frames)
-                min_S_y = np.min(S_y_frames)
-                max_S_y = np.max(S_y_frames)
+                min_u_1 = np.min(u_1_frames)
+                max_u_1 = np.max(u_1_frames)
+                min_u_2 = np.min(u_2_frames)
+                max_u_2 = np.max(u_2_frames)
+                max_s_mises = np.max(s_mises_frames)
+                min_s_22 = np.min(s_22_frames)
+                max_s_22 = np.max(s_22_frames)
                 max_strain_energy = np.max(strain_energy_frames)
-                frame_ranges = np.array([min_disp_x, max_disp_x, min_disp_y, max_disp_y, max_von_Mises, min_S_y, max_S_y, max_strain_energy])
-                frame_ranges_header = ['min_disp_x', 'max_disp_x', 'min_disp_y', 'max_disp_y', 'max_von_Mises', 'min_s_22', 'max_s_22', 'max_strain_energy']
+                frame_range = np.array([min_u_1, max_u_1, min_u_2, max_u_2, max_s_mises, min_s_22, max_s_22, max_strain_energy])
+                frame_range_header = ['min_u_1', 'max_u_1', 'min_u_2', 'max_u_2', 'max_s_mises', 'min_s_22', 'max_s_22', 'max_strain_energy']
 
                 # rescale data to [0,1]
-                if not frame_ranges.any() == 0:
-                    disp_x_frames = (disp_x_frames - min_disp_x) / (max_disp_x - min_disp_x)
-                    disp_y_frames = (disp_y_frames - min_disp_y) / (max_disp_y - min_disp_y)
-                    von_mises_frames = von_mises_frames / max_von_Mises
-                    S_y_frames = (S_y_frames - min_S_y) / (max_S_y - min_S_y)
+                if not frame_range.any() == 0:
+                    u_1_frames = (u_1_frames - min_u_1) / (max_u_1 - min_u_1)
+                    u_2_frames = (u_2_frames - min_u_2) / (max_u_2 - min_u_2)
+                    s_mises_frames = s_mises_frames / max_s_mises
+                    s_22_frames = (s_22_frames - min_s_22) / (max_s_22 - min_s_22)
 
-                disp_x_frames = (disp_x_frames * 255).astype(np.uint8)
-                disp_y_frames = (disp_y_frames * 255).astype(np.uint8)
-                von_mises_frames = (von_mises_frames * 255).astype(np.uint8)
-                S_y_frames = (S_y_frames * 255).astype(np.uint8)
+                u_1_frames = (u_1_frames * 255).astype(np.uint8)
+                u_2_frames = (u_2_frames * 255).astype(np.uint8)
+                s_mises_frames = (s_mises_frames * 255).astype(np.uint8)
+                s_22_frames = (s_22_frames * 255).astype(np.uint8)
 
                 # stack all frames at the end for consistent gif creation
-                full_frames = np.stack((disp_x_frames, disp_y_frames, von_mises_frames, S_y_frames), axis=-1).astype(np.uint8)
+                full_frames = np.stack((u_1_frames, u_2_frames, s_mises_frames, s_22_frames), axis=-1).astype(np.uint8)
 
             # save as gif
             os.chdir(original_dir)
@@ -129,9 +129,9 @@ def main():
                 images = []
                 for k in range(no_frames):
                     images.append(full_frames[k,:,:,j])            
-                imageio.mimsave(os.path.join(gif_save_dir, 'channel_' + str(j+1) + '.gif'), images, duration=0.2)
+                imageio.mimsave(os.path.join(gif_save_dir, 'prediction_channel_' + str(j) + '.gif'), images, duration=0.2)
 
-            np.savetxt(os.path.join(gif_save_dir, 'frame_ranges.csv'), np.array([frame_ranges]), delimiter=',', comments='', header=','.join(frame_ranges_header))
+            np.savetxt(os.path.join(gif_save_dir, 'frame_range.csv'), np.array([frame_range]), delimiter=',', comments='', header=','.join(frame_range_header))
             print('gif creation successful')
         else:
             print('gif creation not successful')

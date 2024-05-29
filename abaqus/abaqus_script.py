@@ -1394,14 +1394,14 @@ if store_frames:
 
     # save data also as csv for further post-processing
     np.savetxt(os.path.join(save_path, 'geometry_frames_eul.csv'), geom_full_eul, delimiter = ',', fmt='%i')
-    np.savetxt(os.path.join(save_path, 'von_Mises_frames_eul.csv'), von_Mises_full_eul, delimiter = ',')
+    np.savetxt(os.path.join(save_path, 's_mises_frames_eul.csv'), von_Mises_full_eul, delimiter = ',')
     np.savetxt(os.path.join(save_path, 's_22_frames_eul.csv'), S_y_full_eul, delimiter = ',')
     np.savetxt(os.path.join(save_path, 'strain_energy_dens_frames_eul.csv'), strain_energy_dens_full_eul, delimiter = ',')
 
     np.savetxt(os.path.join(save_path, 'geometry_frames_lagr.csv'), geom_full_lagr, delimiter = ',', fmt='%i')
-    np.savetxt(os.path.join(save_path, 'x_disp_frames_lagr.csv'), x_disp_full_lagr, delimiter = ',')
-    np.savetxt(os.path.join(save_path, 'y_disp_frames_lagr.csv'), y_disp_full_lagr, delimiter = ',')
-    np.savetxt(os.path.join(save_path, 'von_Mises_frames_lagr.csv'), von_Mises_full_lagr, delimiter = ',')
+    np.savetxt(os.path.join(save_path, 'u_1_frames_lagr.csv'), x_disp_full_lagr, delimiter = ',')
+    np.savetxt(os.path.join(save_path, 'u_2_frames_lagr.csv'), y_disp_full_lagr, delimiter = ',')
+    np.savetxt(os.path.join(save_path, 's_mises_frames_lagr.csv'), von_Mises_full_lagr, delimiter = ',')
     np.savetxt(os.path.join(save_path, 's_22_frames_lagr.csv'), S_y_full_lagr, delimiter = ',')
     np.savetxt(os.path.join(save_path, 'strain_energy_dens_frames_lagr.csv'), strain_energy_dens_full_lagr, delimiter = ',')
 
