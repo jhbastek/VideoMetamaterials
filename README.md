@@ -76,6 +76,8 @@ Package | Version (>=)
 `imageio`       | `2.28.1`
 `tqdm`          | `4.65.0`
 `networkx`          | `2.8.4`
+`matplotlib` (for visualization)          | `3.8.0`
+`pillow` (for visualization)          | `10.0.1`
 `wandb` (optional)        | `0.15.2`
 
 To run the FEM simulations a license of Abaqus CAE 2020 is required.
