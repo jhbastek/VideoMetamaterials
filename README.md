@@ -1,5 +1,6 @@
 <h1 align="center">Inverse-design of nonlinear mechanical metamaterials<br>via video denoising diffusion models</h1>
 <h4 align="center">
+<a href="https://www.nature.com/articles/s42256-023-00762-x"><img src="https://zenodo.org/badge/DOI/10.1038/s42256-023-00762-x.svg" alt="DOI"></a>  
 <a href="https://arxiv.org/abs/2305.19836"><img src="https://img.shields.io/badge/arXiv-2305.19836-blue" alt="arXiv"></a>
 <a href="https://doi.org/10.5281/zenodo.10011767"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10011767.svg" alt="DOI"></a>  
 </h4>
